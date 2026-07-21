@@ -1,0 +1,460 @@
+{
+  "airplane": {
+    "accept": [
+      "aiplane",
+      "airlplane",
+      "airplae",
+      "airplaen",
+      "airplaine"
+    ],
+    "reject": [
+      "airplan",
+      "aeroplane",
+      "airplant"
+    ]
+  },
+  "allegiance": {
+    "accept": [
+      "alegence",
+      "alegiance",
+      "aliegence",
+      "aligence",
+      "aligiance",
+      "allegence",
+      "allegiancce",
+      "allegience",
+      "alleigence",
+      "alliegence",
+      "alligence",
+      "allegents",
+      "alligience"
+    ],
+    "reject": [
+      "aliagence",
+      "allience",
+      "alligenace",
+      "alligance",
+      "alliagence",
+      "alliegance",
+      "aliegance",
+      "allegance",
+      "alegance",
+      "alleigance"
+    ]
+  },
+  "aquarium": {
+    "accept": [
+      "aqarium",
+      "aqaurirum",
+      "aqaurium",
+      "aquairum",
+      "aquaium",
+      "aquariam",
+      "aquariame",
+      "aquriam",
+      "aqurium",
+      "awuarium",
+      "aquarim"
+    ],
+    "reject": [
+      "accordion",
+      "acorrium",
+      "acreyan",
+      "aquiarn"
+    ]
+  },
+  "astronaut": {
+    "accept": [
+      "astronaout",
+      "astronaught",
+      "astronaunt",
+      "astronuant",
+      "astronut",
+      "astrounat",
+      "astrounaut",
+      "austronaut"
+    ],
+    "reject": [
+      "astronau",
+      "astronaugh",
+      "astronaunts",
+      "astrounuant"
+    ]
+  },
+  "attracted": {
+    "accept": [
+      "atracted",
+      "atrracted",
+      "attarcted",
+      "attractd"
+    ],
+    "reject": [
+      "attrachted",
+      "attrached",
+      "attracked",
+      "attacted"
+    ]
+  },
+  "banana": {
+    "accept": [
+      "bananana",
+      "bananna",
+      "bannana",
+      "bannanna"
+    ],
+    "reject": []
+  },
+  "beautiful": {
+    "accept": [
+      "beautful",
+      "beutfiul",
+      "beutiful"
+    ],
+    "reject": []
+  },
+  "button": {
+    "accept": [
+      "buton",
+      "buttin"
+    ],
+    "reject": [
+      "bottom",
+      "botton",
+      "butoon"
+    ]
+  },
+  "caterpillar": {
+    "accept": [
+      "catapiler",
+      "catapillar",
+      "catapiller",
+      "catepillar",
+      "caterpiller",
+      "catipillar",
+      "catipiller",
+      "catipilor",
+      "catpillar",
+      "catterpillar",
+      "catterpiller"
+    ],
+    "reject": [
+      "capitaliar",
+      "captiailarpillar",
+      "catipliier",
+      "catepillars",
+      "capapillar",
+      "capitapillar"
+    ]
+  },
+  "channels": {
+    "accept": [
+      "chanels",
+      "chanles",
+      "channles"
+    ],
+    "reject": [
+      "channal",
+      "channle"
+    ]
+  },
+  "christmas": {
+    "accept": [
+      "chrismas",
+      "chrstimas"
+    ],
+    "reject": []
+  },
+  "circus": {
+    "accept": [
+      "cirucs"
+    ],
+    "reject": [
+      "cicus",
+      "cirus"
+    ]
+  },
+  "creepy": {
+    "accept": [
+      "creapy",
+      "creeepy"
+    ],
+    "reject": [
+      "creppy",
+      "creeply",
+      "creeping"
+    ]
+  },
+  "dinosaur": {
+    "accept": [
+      "dinasaur",
+      "dinasor",
+      "dinasour",
+      "dinosour",
+      "dinosoar",
+      "dinosuar"
+    ],
+    "reject": [
+      "donosaur",
+      "dinisor",
+      "dinasours",
+      "dinoasour",
+      "dinosar",
+      "dinsaour"
+    ]
+  },
+  "electricity": {
+    "accept": [
+      "electicity",
+      "electrcity",
+      "electricty",
+      "eleticity",
+      "eletricity"
+    ],
+    "reject": []
+  },
+  "elephant": {
+    "accept": [
+      "elaphant",
+      "elaphent",
+      "elepahnt",
+      "elephatn"
+    ],
+    "reject": []
+  },
+  "furniture": {
+    "accept": [
+      "funiture",
+      "furnature"
+    ],
+    "reject": [
+      "funirture",
+      "furinture",
+      "furniter",
+      "furnititure"
+    ]
+  },
+  "fossils": {
+    "accept": [
+      "fosils"
+    ],
+    "reject": [
+      "fosfils",
+      "fosfil",
+      "fossiles"
+    ]
+  },
+  "giraffe": {
+    "accept": [
+      "girafee",
+      "giraff",
+      "girraffe"
+    ],
+    "reject": [
+      "gariffe",
+      "graiff",
+      "graiffe",
+      "giraffie",
+      "girahpe",
+      "graiffs"
+    ]
+  },
+  "groceries": {
+    "accept": [
+      "grocieres",
+      "grocreries"
+    ],
+    "reject": [
+      "grocies",
+      "grociers"
+    ]
+  },
+  "guitar": {
+    "accept": [
+      "gitaur",
+      "gituar",
+      "guiatr"
+    ],
+    "reject": [
+      "guatair",
+      "guatir"
+    ]
+  },
+  "helmet": {
+    "accept": [
+      "helmit",
+      "helmt"
+    ],
+    "reject": [
+      "helmat",
+      "helment",
+      "halment"
+    ]
+  },
+  "juice": {
+    "accept": [
+      "juce",
+      "juic"
+    ],
+    "reject": [
+      "jusice"
+    ]
+  },
+  "lilypad": {
+    "accept": [
+      "lilipad",
+      "lillipad",
+      "liliepad",
+      "lillypad",
+      "lilliepad"
+    ],
+    "reject": []
+  },
+  "marshmallows": {
+    "accept": [
+      "marhsmallows",
+      "marshmellos",
+      "marshmellow",
+      "marshmellows",
+      "mashmellow"
+    ],
+    "reject": [
+      "marshamallows",
+      "mashmallows"
+    ]
+  },
+  "mommy": {
+    "accept": [
+      "mommmy"
+    ],
+    "reject": [
+      "mummy",
+      "momy",
+      "mammy"
+    ]
+  },
+  "motorcycle": {
+    "accept": [
+      "motercycle",
+      "motocycle",
+      "motorcylce",
+      "motorcyle"
+    ],
+    "reject": []
+  },
+  "munching": {
+    "accept": [
+      "muching",
+      "munchin"
+    ],
+    "reject": [
+      "munchy"
+    ]
+  },
+  "oranges": {
+    "accept": [
+      "oragnes",
+      "orangs",
+      "organges"
+    ],
+    "reject": []
+  },
+  "petals": {
+    "accept": [
+      "petls",
+      "peddles"
+    ],
+    "reject": [
+      "paddles",
+      "pettle",
+      "peatals",
+      "peatels"
+    ]
+  },
+  "pepperoni": {
+    "accept": [
+      "peperoni",
+      "pepporoni"
+    ],
+    "reject": [
+      "peporine",
+      "pepperonin"
+    ]
+  },
+  "poured": {
+    "accept": [
+      "pored"
+    ],
+    "reject": [
+      "poored"
+    ]
+  },
+  "pumpkin": {
+    "accept": [
+      "pumkin",
+      "pumkpin"
+    ],
+    "reject": [
+      "pumpkim"
+    ]
+  },
+  "quacking": {
+    "accept": [],
+    "reject": [
+      "quaking",
+      "qucking"
+    ]
+  },
+  "recess": {
+    "accept": [
+      "reccess",
+      "reecess"
+    ],
+    "reject": [
+      "reacese"
+    ]
+  },
+  "soldiers": {
+    "accept": [
+      "sldiers",
+      "soilders",
+      "soliders"
+    ],
+    "reject": []
+  },
+  "squeezed": {
+    "accept": [
+      "sqeezed",
+      "squezed"
+    ],
+    "reject": [
+      "sqeeeze",
+      "sqeeked"
+    ]
+  },
+  "striped": {
+    "accept": [],
+    "reject": [
+      "stiped",
+      "strip",
+      "stripe",
+      "stripes"
+    ]
+  },
+  "turtle": {
+    "accept": [
+      "tutrtle"
+    ],
+    "reject": [
+      "tutel"
+    ]
+  },
+  "witch": {
+    "accept": [
+      "withc"
+    ],
+    "reject": [
+      "with",
+      "witj"
+    ]
+  }
+}
