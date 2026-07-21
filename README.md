@@ -1,13 +1,12 @@
 # MTAA Transcription Scorer
 
 Scores participant transcriptions against target sentences using the
-decision rules in `MTAA_Manual.html`, plus the ~40 word-specific
+decision rules in the `MTAA Manual`, plus the ~40 word-specific
 accept/reject lists the manual already spells out.
 
 ## Files
 - `codebook.json` — the manual's per-word accept/reject lists, parsed
-  directly out of the HTML (Airplane, Allegiance, Aquarium, ... Witch).
-  This is ground truth: any response matching one of these is decided
+  directly. This is ground truth: any response matching one of these is decided
   immediately, no judgment call involved.
 - `mtaa_scorer.py` — the classifier. `classify_word(target, response)`
   scores one word pair; `score_sentence(target_sentence, response_sentence)`
@@ -20,46 +19,38 @@ accept/reject lists the manual already spells out.
 ## How it decides (in order)
 1. **Exact match** → accept.
 2. **Codebook lookup** → accept/reject per the manual's explicit lists.
-3. **Spacing** (rule 1) → accept if removing all spaces makes target and
+3. **Spacing** → accept if removing all spaces makes target and
    response identical.
-4. **Homophones** (rule 2) → accept, via an explicit list from the manual
+4. **Homophones** → accept, via an explicit list from the manual
    plus a CMU Pronouncing Dictionary phoneme check.
 5. **Real-word check** → if the response is itself a different, real
    English word, reject as a different lexical item (e.g. bag→bat,
-   broom→brook, web→wen). This mirrors the manual's repeated point that a
-   typo shouldn't accidentally get credit for spelling a different word.
-6. **Doubling ambiguity** (rule 4/6) → accept single-letter deletion/
+   broom→brook, web→wen).
+6. **Doubling ambiguity** → accept single-letter deletion/
    repetition of an already-doubled *consonant* (buton/button,
    catterpiller/caterpillar). Vowel doubling is excluded on purpose —
-   tree→tre and shell→sheel change the vowel's length/quality, which the
-   manual treats as a real pronunciation change, not a spelling slip.
-7. **Adjacent-letter transposition** (rule 5) and **adjacent-key
-   substitution** (rule 3a) → accept only when the letters involved are
+   tree→tre and shell→sheel change the vowel's length/quality, which is treated
+   as a real pronunciation change.
+8. **Adjacent-letter transposition** and **adjacent-key
+   substitution** → accept only when the letters involved are
    both consonants, for the same reason as above.
-8. **Default** → reject (the manual's own explicit conservative rule:
-   "when there is reasonable ambiguity, code the response as incorrect").
+9. **Default** → reject (when there is reasonable ambiguity, code the response as incorrect).
 
 Every word that lands on a rule with low confidence (a substitution/
 insertion/deletion that isn't the doubling case, or a transposition/
 substitution involving a vowel) is tagged `flag_for_review` in the
-output, and the sentence gets `needs_review = True`. That's your
-spot-check queue — it should be a small fraction of the data, not
-everything.
+output, and the sentence gets `needs_review = True`. 
 
-## Known limitations (be aware, don't over-trust)
-- Vowel-involving transpositions are the single hardest case. The manual's
-  own reviewers disagree on some of these in the comments (e.g. "freind"
-  for "friend" was accepted by one reviewer via letter transposition, but
-  the same swap pattern is rejected elsewhere — "castle"→"castel" — because
-  it changes pronunciation). The scorer defaults to reject+flag here rather
-  than guess.
+## Limitations
+- Vowel-involving transpositions are the single hardest case (e.g. "freind"
+  for "friend" was accepted via letter transposition, but the same swap pattern is
+  rejected elsewhere — "castle"→"castel" — because it changes pronunciation).
+  The scorer defaults to reject+flag here.
 - Morphological changes (verb tense, plurals) and whole-syllable omission
-  aren't separately modeled — they mostly fall through to the conservative
-  default (reject + flag), which matches the manual's stated policy but
-  means you should scan the flagged rows.
+  aren't separately modeled — they mostly fall through to the default (reject + flag).
 - Word-level alignment between target and response sentences uses a
   standard sequence diff. It handles single-word substitutions and the
-  space-repair case (rule 1) well; it's not built to handle a participant
+  space-repair case well; it's not built to handle a participant
   reordering multiple words or dropping several words in a row — those
   will show up as `extra_word`/`omission` entries you'll want to eyeball.
 
