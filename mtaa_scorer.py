@@ -452,5 +452,21 @@ def score_sentence(target_sentence: str, response_sentence: str):
             result["response"] = rw
             results.append(result)
     overall = "accept" if all(r["decision"] == "accept" for r in results) else "reject"
-    needs_review = any(r.get("detail") == "flag_for_review" for r in results)
-    return {"overall": overall, "needs_review": needs_review, "words": results}
+
+    # Was every word an exact, verbatim match? If overall is "accept" but
+    # some word only passed via a typo/homophone/etc. rule, that's an
+    # accepted VARIATION from the target -- worth a human glance even
+    # though it's not a low-confidence call.
+    has_accepted_variation = overall == "accept" and any(
+        r["rule"] != "exact_match" for r in results
+    )
+
+    low_confidence = any(r.get("detail") == "flag_for_review" for r in results)
+    needs_review = low_confidence or has_accepted_variation
+
+    return {
+        "overall": overall,
+        "needs_review": needs_review,
+        "has_accepted_variation": has_accepted_variation,
+        "words": results,
+    }
