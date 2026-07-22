@@ -48,7 +48,7 @@ def main():
         sys.exit(1)
 
     out_fieldnames = fieldnames + [
-        "overall_decision", "needs_review", "word_details",
+        "overall_decision", "needs_review", "has_accepted_variation", "word_details",
         "final_word_target", "final_word_response",
         "final_word_decision", "final_word_rule",
     ]
@@ -65,6 +65,7 @@ def main():
             result = score_sentence(target, response)
             row["overall_decision"] = result["overall"]
             row["needs_review"] = result["needs_review"]
+            row["has_accepted_variation"] = result["has_accepted_variation"]
             row["word_details"] = json.dumps(result["words"], ensure_ascii=False)
 
             # Final-word-only score: many carrier-sentence designs vary only
