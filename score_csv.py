@@ -17,6 +17,9 @@ Output: the original CSV plus these new columns:
     accepted_variation_target     The target token(s) that were accepted despite a typo
     accepted_variation_response   The model's accepted typo token(s)
     accepted_variation_rule       The specific rule that permitted the accepted typo
+    rejected_variation_target     The target token(s) that were rejected
+    rejected_variation_response   The response token(s) that caused the rejection
+    rejected_variation_rule       The rule indicating why the token was rejected
     word_details                  JSON list of per-word decisions (target, response,
                                   decision, rule) for auditing / spot-checking
 """
@@ -51,10 +54,11 @@ def main():
         )
         sys.exit(1)
 
-    # Added the rule column and removed the final_word columns
+    # Added the rejected variation columns
     out_fieldnames = fieldnames + [
         "overall_decision", "needs_review", "has_accepted_variation", 
         "accepted_variation_target", "accepted_variation_response", "accepted_variation_rule",
+        "rejected_variation_target", "rejected_variation_response", "rejected_variation_rule",
         "word_details"
     ]
     n_review = 0
@@ -73,23 +77,36 @@ def main():
             row["has_accepted_variation"] = result["has_accepted_variation"]
             row["word_details"] = json.dumps(result["words"], ensure_ascii=False)
 
-            # --- Isolate accepted variations and their rules ---
-            var_targets = []
-            var_responses = []
-            var_rules = []
+            # --- Isolate accepted and rejected variations ---
+            acc_targets = []
+            acc_responses = []
+            acc_rules = []
             
-            if result["has_accepted_variation"]:
-                for w in result["words"]:
-                    # An accepted variation is any accepted word that isn't an exact match
-                    if w["decision"] == "accept" and w["rule"] != "exact_match":
-                        var_targets.append(str(w["target"]))
-                        var_responses.append(str(w["response"]))
-                        var_rules.append(str(w["rule"]))
+            rej_targets = []
+            rej_responses = []
+            rej_rules = []
             
-            row["accepted_variation_target"] = " | ".join(var_targets)
-            row["accepted_variation_response"] = " | ".join(var_responses)
-            row["accepted_variation_rule"] = " | ".join(var_rules)
-            # ---------------------------------------------------
+            for w in result["words"]:
+                # Accepted variations (not exact matches)
+                if w["decision"] == "accept" and w["rule"] != "exact_match":
+                    acc_targets.append(str(w["target"]))
+                    acc_responses.append(str(w["response"]))
+                    acc_rules.append(str(w["rule"]))
+                
+                # Rejected variations
+                elif w["decision"] == "reject":
+                    rej_targets.append(str(w["target"]))
+                    rej_responses.append(str(w["response"]))
+                    rej_rules.append(str(w["rule"]))
+            
+            row["accepted_variation_target"] = " | ".join(acc_targets)
+            row["accepted_variation_response"] = " | ".join(acc_responses)
+            row["accepted_variation_rule"] = " | ".join(acc_rules)
+            
+            row["rejected_variation_target"] = " | ".join(rej_targets)
+            row["rejected_variation_response"] = " | ".join(rej_responses)
+            row["rejected_variation_rule"] = " | ".join(rej_rules)
+            # ------------------------------------------------
 
             if result["overall"] == "reject":
                 n_reject += 1
