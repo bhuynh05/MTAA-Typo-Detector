@@ -11,10 +11,13 @@ sentence and one column with what the participant typed. Add
 below.
 
 Output: the original CSV plus these new columns:
-    overall_decision   accept / reject for the whole sentence
-    needs_review       True if any word landed on a low-confidence rule
-    word_details       JSON list of per-word decisions (target, response,
-                        decision, rule) for auditing / spot-checking
+    overall_decision              accept / reject for the whole sentence
+    needs_review                  True if any word landed on a low-confidence rule
+    has_accepted_variation        True if sentence was accepted but contained non-exact matches
+    accepted_variation_target     The target token(s) that were accepted despite a typo
+    accepted_variation_response   The model's accepted typo token(s)
+    word_details                  JSON list of per-word decisions (target, response,
+                                  decision, rule) for auditing / spot-checking
 """
 
 import argparse
@@ -47,8 +50,10 @@ def main():
         )
         sys.exit(1)
 
+    # Added the two new variation isolation columns
     out_fieldnames = fieldnames + [
         "overall_decision", "needs_review", "has_accepted_variation", "word_details",
+        "accepted_variation_target", "accepted_variation_response",
         "final_word_target", "final_word_response",
         "final_word_decision", "final_word_rule",
     ]
@@ -67,6 +72,20 @@ def main():
             row["needs_review"] = result["needs_review"]
             row["has_accepted_variation"] = result["has_accepted_variation"]
             row["word_details"] = json.dumps(result["words"], ensure_ascii=False)
+
+            # --- NEW: Isolate accepted variations ---
+            var_targets = []
+            var_responses = []
+            
+            if result["has_accepted_variation"]:
+                for w in result["words"]:
+                    if w["decision"] == "accept" and w["rule"] != "exact_match":
+                        var_targets.append(str(w["target"]))
+                        var_responses.append(str(w["response"]))
+            
+            row["accepted_variation_target"] = " | ".join(var_targets)
+            row["accepted_variation_response"] = " | ".join(var_responses)
+            # -----------------------------------------
 
             # Final-word-only score: many carrier-sentence designs vary only
             # the last word, so this is often the metric that actually matters.
