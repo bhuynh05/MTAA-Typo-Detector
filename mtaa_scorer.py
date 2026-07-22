@@ -40,6 +40,51 @@ with open(CODEBOOK_PATH) as f:
     CODEBOOK = json.load(f)
 
 # ---------------------------------------------------------------------------
+# Contractions: "there's" <-> "there is", "daddy's" <-> "daddys", etc.
+# Two separate phenomena:
+#   (a) apostrophe simply dropped while typing ("daddy's" -> "daddys",
+#       "there's" -> "theres") -- handled by stripping punctuation, same
+#       spirit as the spacing rule.
+#   (b) contraction spelled out as two words ("there's" -> "there is") --
+#       needs an actual mapping since "theres" != "thereis" as strings.
+# ---------------------------------------------------------------------------
+CONTRACTION_EXPANSIONS = {
+    "'s": ["is", "has"],
+    "'re": ["are"],
+    "'ll": ["will"],
+    "'ve": ["have"],
+    "'d": ["would", "had"],
+    "n't": ["not"],
+}
+
+
+def _strip_punct(s: str) -> str:
+    return s.replace(" ", "").replace("'", "").replace("\u2019", "")
+
+
+def _contraction_match(contracted: str, expanded_words):
+    """'there's', ['there', 'is'] -> True"""
+    if len(expanded_words) != 2:
+        return False
+    for suffix, options in CONTRACTION_EXPANSIONS.items():
+        if contracted.endswith(suffix):
+            stem = contracted[: -len(suffix)]
+            if expanded_words[0] == stem and expanded_words[1] in options:
+                return True
+    return False
+
+
+def is_contraction_equivalent(t: str, r: str) -> bool:
+    """True if t and r are the same contraction, just one written as two
+    words -- checked in both directions since either side could be typed
+    as the contracted or the expanded form."""
+    if " " in r and " " not in t:
+        return _contraction_match(t, r.split(" "))
+    if " " in t and " " not in r:
+        return _contraction_match(r, t.split(" "))
+    return False
+
+# ---------------------------------------------------------------------------
 # Homophone pairs pulled directly from the manual's "Accept homophones" list.
 # Stored both directions. Extend this as new homophones come up in your data.
 # ---------------------------------------------------------------------------
@@ -66,20 +111,31 @@ for a, b in HOMOPHONE_PAIRS:
 # ---------------------------------------------------------------------------
 # QWERTY adjacency map for the "adjacent-key substitution" rule (3a)
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# QWERTY adjacency map for the "adjacent-key substitution" rule (3a).
+# Uses approximate physical key positions (real keyboards are staggered,
+# each row shifted right relative to the one above) so that diagonal /
+# "same column" neighbors across rows are captured too -- e.g. 'c' sits
+# physically between 'd' and 'f' on the row above, not under either 's' or
+# 'g'. Row offsets below (0, 0.5, 1.0) approximate standard ANSI stagger.
+# ---------------------------------------------------------------------------
 QWERTY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
-_ADJ = {}
+ROW_OFFSETS = [0.0, 0.5, 1.0]
+_POSITIONS = {}
 for row_i, row in enumerate(QWERTY_ROWS):
     for i, ch in enumerate(row):
-        neighbors = set()
-        if i > 0:
-            neighbors.add(row[i - 1])
-        if i < len(row) - 1:
-            neighbors.add(row[i + 1])
-        # also treat the same-column key in the row above/below as adjacent
-        for other_row in QWERTY_ROWS:
-            if other_row is row:
-                continue
-        _ADJ[ch] = neighbors
+        _POSITIONS[ch] = (row_i, i + ROW_OFFSETS[row_i])
+
+_ADJ = {ch: set() for ch in _POSITIONS}
+_COLUMN_THRESHOLD = 0.75  # captures the two diagonal neighbors in an adjacent row
+for ch_a, (row_a, x_a) in _POSITIONS.items():
+    for ch_b, (row_b, x_b) in _POSITIONS.items():
+        if ch_a == ch_b:
+            continue
+        if row_a == row_b and abs(row_a - row_b) == 0 and abs(_POSITIONS[ch_a][1] - x_b) == 1:
+            _ADJ[ch_a].add(ch_b)  # same-row left/right neighbor
+        elif abs(row_a - row_b) == 1 and abs(x_a - x_b) <= _COLUMN_THRESHOLD:
+            _ADJ[ch_a].add(ch_b)  # diagonal/"column" neighbor in the row above/below
 QWERTY_ADJACENT = _ADJ
 
 
@@ -247,9 +303,13 @@ def classify_word(target: str, response: str):
         if r in cb["reject"]:
             return {"decision": "reject", "rule": "codebook", "detail": ""}
 
-    # Rule 1: incorrect spacing
-    if r.replace(" ", "") == t.replace(" ", ""):
-        return {"decision": "accept", "rule": "spacing", "detail": ""}
+    # Rule 1: incorrect spacing OR a dropped apostrophe (daddy's -> daddys)
+    if _strip_punct(r) == _strip_punct(t):
+        return {"decision": "accept", "rule": "spacing_or_apostrophe", "detail": ""}
+
+    # Contraction written as two words (there's -> there is) or vice versa
+    if is_contraction_equivalent(t, r):
+        return {"decision": "accept", "rule": "contraction_equivalent", "detail": ""}
 
     # Rule 2: homophones
     if frozenset((t, r)) in HOMOPHONE_SET:
@@ -354,6 +414,11 @@ def align_words(target_sentence: str, response_sentence: str):
             # space was inserted/omitted across a word boundary.
             if "".join(t_seg) == "".join(r_seg):
                 # same letters, different spacing -> treat as one accepted unit
+                pairs.append((" ".join(t_seg), " ".join(r_seg)))
+            elif (len(t_seg) == 1 and _contraction_match(t_seg[0], r_seg)) or \
+                 (len(r_seg) == 1 and _contraction_match(r_seg[0], t_seg)):
+                # "there's" <-> "there is" -- bundle as one comparison unit
+                # instead of splitting into a mismatched pair + a stray extra word
                 pairs.append((" ".join(t_seg), " ".join(r_seg)))
             else:
                 # fall back to one-to-one where possible, else pad with None
