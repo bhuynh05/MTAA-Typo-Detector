@@ -1,7 +1,7 @@
 """
 MTAA transcription scorer
 ==========================
-Implements the decision procedure in MTAA_Manual.html as a tiered classifier:
+Implements the decision procedure in MTAA_Manual as a tiered classifier:
 
   Tier 0 — normalize
   Tier 1 — exact match
@@ -11,8 +11,8 @@ Implements the decision procedure in MTAA_Manual.html as a tiered classifier:
            single-letter deletion/doubling, adjacent transposition),
            gated by a "does this still sound like / read as the target"
            check and a "did this become a different real word" check
-  Tier 4 — default REJECT (the manual's explicit conservative fallback),
-           flagged for human review since it's the least certain bucket
+  Tier 4 — default REJECT - flagged for human review since it's the 
+            least certain bucket. Accepted typos are also flagged.
 
 The word-level rules require the response to already be ALIGNED to a
 target word. Use `align_words()` to turn a (target_sentence, response_sentence)
@@ -20,13 +20,13 @@ pair into a list of (target_word_or_None, response_word_or_None) pairs,
 then classify each pair with `classify_pair()`.
 """
 
-import re
-import json
-import difflib
-from pathlib import Path
+import re # for regex-based tokenization
+import json # for loading the codebook
+import difflib # for sequence matching and edit distance
+from pathlib import Path # for locating the codebook file
 
-import pronouncing
-import nltk
+import pronouncing # for CMUdict-based pronunciation checks for homophones
+import nltk # for dictionary word checks
 try:
     from nltk.corpus import words as _nltk_words
     ENGLISH_WORDS = set(w.lower() for w in _nltk_words.words())
@@ -40,13 +40,7 @@ with open(CODEBOOK_PATH) as f:
     CODEBOOK = json.load(f)
 
 # ---------------------------------------------------------------------------
-# Contractions: "there's" <-> "there is", "daddy's" <-> "daddys", etc.
-# Two separate phenomena:
-#   (a) apostrophe simply dropped while typing ("daddy's" -> "daddys",
-#       "there's" -> "theres") -- handled by stripping punctuation, same
-#       spirit as the spacing rule.
-#   (b) contraction spelled out as two words ("there's" -> "there is") --
-#       needs an actual mapping since "theres" != "thereis" as strings.
+# Contractions: 
 # ---------------------------------------------------------------------------
 CONTRACTION_EXPANSIONS = {
     "'s": ["is", "has"],
@@ -86,7 +80,7 @@ def is_contraction_equivalent(t: str, r: str) -> bool:
 
 # ---------------------------------------------------------------------------
 # Homophone pairs pulled directly from the manual's "Accept homophones" list.
-# Stored both directions. Extend this as new homophones come up in your data.
+# Stored both directions. Can be extended as new homophones come up.
 # ---------------------------------------------------------------------------
 HOMOPHONE_PAIRS = [
     ("their", "there"), ("their", "they're"), ("there", "they're"),
@@ -150,8 +144,7 @@ def is_adjacent_key(a: str, b: str) -> bool:
 def is_real_english_word(word: str) -> bool:
     """True if `word` is a dictionary English word. Deliberately dictionary-
     based rather than corpus-frequency-based: frequency counts from web text
-    treat extremely common TYPOS (e.g. 'freind') as if they were words, which
-    is exactly backwards for this task. Also checks simple inflections
+    treat extremely common TYPOS (e.g. 'freind') as if they were words. Also checks simple inflections
     (plural -s/-es, -ed, -ing) since the base wordlist is lemma-heavy and
     otherwise misses things like 'nets' (plural of 'net')."""
     w = word.lower()
@@ -205,13 +198,13 @@ def edit_ops(a: str, b: str):
     opcodes = [op for op in sm.get_opcodes() if op[0] != "equal"]
     if not opcodes:
         return "equal", None
-    if len(opcodes) == 1:
+    if len(opcodes) == 1: 
         tag, i1, i2, j1, j2 = opcodes[0]
-        if tag == "replace" and (i2 - i1) == 1 and (j2 - j1) == 1:
+        if tag == "replace" and (i2 - i1) == 1 and (j2 - j1) == 1: # single-char substitution
             return "substitution", (a[i1:i2], b[j1:j2])
-        if tag == "delete" and (i2 - i1) == 1:
+        if tag == "delete" and (i2 - i1) == 1: # single-char deletion
             return "deletion", a[i1:i2]
-        if tag == "insert" and (j2 - j1) == 1:
+        if tag == "insert" and (j2 - j1) == 1: # single-char insertion
             return "insertion", b[j1:j2]
     # adjacent transposition check: swap of two neighboring chars
     if len(a) == len(b):
@@ -233,7 +226,7 @@ def is_vowel(ch: str) -> bool:
 def squeeze_runs(s: str) -> str:
     """Collapse consecutive repeated letters to one, e.g. 'catterpiller'
     -> 'caterpiler'. Used to detect the 'uncertain about doubling' pattern
-    (rule 4/6) independent of exactly which letter got added/dropped."""
+    independent of exactly which letter got added/dropped."""
     out = []
     for ch in s:
         if not out or out[-1] != ch:
@@ -241,7 +234,7 @@ def squeeze_runs(s: str) -> str:
     return "".join(out)
 
 
-def runs(s: str):
+def runs(s: str): 
     """['s','h','e','l','l'] -> [('s',1),('h',1),('e',1),('l',2)]"""
     out = []
     for ch in s:
